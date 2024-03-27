@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -8,9 +10,11 @@ from fastapi import status, HTTPException, Request
 from routers.user import logout
 
 
+load_dotenv()
+
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 models.Base.metadata.create_all(bind=engine)
