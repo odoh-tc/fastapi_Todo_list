@@ -72,7 +72,7 @@ async def login(request: Request, db: Session = Depends(get_db)):
             return templates.TemplateResponse("login.html", {"request": request, "msg": msg})
         return response
     except HTTPException:
-        msg = "Unknown Error"
+        msg = "Incorrect Username or Password"
         return templates.TemplateResponse("login.html", {"request": request, "msg": msg})
 
 
@@ -90,12 +90,35 @@ async def register_user(request: Request, email: str = Form(...), username: str 
                         password: str = Form(...), password2: str = Form(...),
                         db: Session = Depends(get_db)):
 
-    validation1 = db.query(models.Users).filter(models.Users.username == username).first()
+    # validation1 = db.query(models.Users).filter(models.Users.username == username).first()
 
-    validation2 = db.query(models.Users).filter(models.Users.email == email).first()
+    # validation2 = db.query(models.Users).filter(models.Users.email == email).first()
 
-    if password != password2 or validation1 is not None or validation2 is not None:
-        msg = "Invalid registration request"
+    # if password != password2 or validation1 is not None or validation2 is not None:
+    #     msg = "Invalid registration request"
+    #     return templates.TemplateResponse("register.html", {"request": request, "msg": msg})
+
+    # Check if the username already exists
+    username_exists = db.query(models.Users).filter(models.Users.username == username).first()
+
+    # Check if the email already exists
+    email_exists = db.query(models.Users).filter(models.Users.email == email).first()
+
+    # Check if passwords match
+    passwords_match = password == password2
+
+    # Determine the appropriate error message
+    if not passwords_match:
+        msg = "Passwords do not match."
+    elif username_exists:
+        msg = "Username already exists. Please choose a different one."
+    elif email_exists:
+        msg = "Email already exists. Please use a different email."
+    else:
+        msg = None  # No errors
+
+    # Return the error message if there is one
+    if msg:
         return templates.TemplateResponse("register.html", {"request": request, "msg": msg})
 
     user_model = models.Users()
